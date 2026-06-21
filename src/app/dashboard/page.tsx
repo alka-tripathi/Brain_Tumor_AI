@@ -64,8 +64,8 @@ export default function DashboardPage() {
         </p>
 
         {/* Cards */}
-       <div className="grid md:grid-cols-4 gap-8">
-          <div className="bg-slate-900 rounded-3xl p-8 shadow-xl">
+       <div className="grid md:grid-cols-3 gap-8">
+          {/* <div className="bg-slate-900 rounded-3xl p-8 shadow-xl">
             <h3 className="text-2xl font-semibold mb-4">
               🧠 Upload MRI Scan
             </h3>
@@ -75,7 +75,7 @@ export default function DashboardPage() {
             <button className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl">
               Upload Image
             </button>
-          </div>
+          </div> */}
 
           <div className="bg-slate-900 rounded-3xl p-8 shadow-xl">
             <h3 className="text-2xl font-semibold mb-4">

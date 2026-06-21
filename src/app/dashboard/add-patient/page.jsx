@@ -1,243 +1,159 @@
-// "use client";
-
-// import { useState } from "react";
-
-// export default function AddPatientPage() {
-//   const [formData, setFormData] = useState({
-//     patientName: "",
-//     patientAge: "",
-//     patientGender: "",
-//     notes: "",
-//   });
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-
-//     const res = await fetch("/api/patients", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify(formData),
-//     });
-
-//     const data = await res.json();
-
-//     if (data.success) {
-//       alert("Patient added successfully!");
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-slate-950 text-white p-10">
-//       <div className="max-w-xl mx-auto bg-slate-900 p-8 rounded-3xl">
-//         <h1 className="text-3xl font-bold mb-8">
-//           ➕ Add Patient
-//         </h1>
-
-//         <form className="space-y-5" onSubmit={handleSubmit}>
-//           <input
-//             type="text"
-//             placeholder="Patient Name"
-//             className="w-full p-3 rounded-xl bg-slate-800"
-//             onChange={(e) =>
-//               setFormData({
-//                 ...formData,
-//                 patientName: e.target.value,
-//               })
-//             }
-//           />
-
-//           <input
-//             type="number"
-//             placeholder="Age"
-//             className="w-full p-3 rounded-xl bg-slate-800"
-//             onChange={(e) =>
-//               setFormData({
-//                 ...formData,
-//                 patientAge: e.target.value,
-//               })
-//             }
-//           />
-
-//           <select
-//             className="w-full p-3 rounded-xl bg-slate-800"
-//             onChange={(e) =>
-//               setFormData({
-//                 ...formData,
-//                 patientGender: e.target.value,
-//               })
-//             }
-//           >
-//             <option value="">Select Gender</option>
-//             <option>Male</option>
-//             <option>Female</option>
-//             <option>Other</option>
-//           </select>
-
-//           <textarea
-//             placeholder="Doctor Notes"
-//             className="w-full p-3 rounded-xl bg-slate-800"
-//             rows="4"
-//             onChange={(e) =>
-//               setFormData({
-//                 ...formData,
-//                 notes: e.target.value,
-//               })
-//             }
-//           />
-
-//           <button className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl">
-//             Save Patient
-//           </button>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { FaArrowLeft, FaHome } from "react-icons/fa";
 
 export default function AddPatientPage() {
-  const [formData, setFormData] = useState({
-    patientName: "",
-    patientAge: "",
-    patientGender: "",
-    notes: "",
-  });
-
-  const [mriImage, setMriImage] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  const generateSummary = async () => {
-    if (!mriImage) return;
-
-    setLoading(true);
-
-    const data = new FormData();
-    data.append("image", mriImage);
-
-    const res = await fetch("/api/analyze-mri", {
-      method: "POST",
-      body: data,
-    });
-
-    const result = await res.json();
-
-    setFormData((prev) => ({
-      ...prev,
-      notes: result.summary,
-    }));
-
-    setLoading(false);
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const res = await fetch("/api/patients", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      alert("Patient added successfully!");
-    }
-  };
+  const router = useRouter();
+  const [patientName, setPatientName] = useState("");
+  const [patientAge, setPatientAge] = useState("");
+  const [patientGender, setPatientGender] = useState("");
+  const [image, setImage] = useState(null);
+  
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-10">
-      <div className="max-w-xl mx-auto bg-slate-900 p-8 rounded-3xl">
-        <h1 className="text-3xl font-bold mb-8">
-          ➕ Add Patient
-        </h1>
+    <div className="min-h-screen bg-slate-950 text-white p-8">
+      <div className="max-w-5xl mx-auto">
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Patient Name"
-            className="w-full p-3 rounded-xl bg-slate-800"
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                patientName: e.target.value,
-              })
-            }
-          />
+        {/* Heading */}
+<div className="flex items-center justify-between mb-8">
 
-          <input
-            type="number"
-            placeholder="Age"
-            className="w-full p-3 rounded-xl bg-slate-800"
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                patientAge: e.target.value,
-              })
-            }
-          />
+  <div>
+    {/* <h1 className="text-5xl font-bold text-blue-500">
+      Add Patient
+    </h1> */}
+    <h1 className="text-4xl font-bold text-blue-500"> Add Patient </h1>
 
-          <select
-            className="w-full p-3 rounded-xl bg-slate-800"
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                patientGender: e.target.value,
-              })
-            }
-          >
-            <option value="">Select Gender</option>
-            <option>Male</option>
-            <option>Female</option>
-            <option>Other</option>
-          </select>
+    <p className="text-slate-400 mt-3 text-lg">
+      Enter patient information and upload MRI scan for analysis.
+    </p>
+  </div>
 
-          {/* MRI Upload */}
-          <div>
-            <label className="block mb-2">
-              Upload MRI Image
-            </label>
+  <button
+    onClick={() => router.push("/dashboard")}
+    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-5 py-3 rounded-2xl shadow-lg transition"
+  >
+    <FaHome />
+    Dashboard
+  </button>
 
-            <input
-              type="file"
-              accept="image/*"
-              className="w-full p-3 rounded-xl bg-slate-800"
-              onChange={(e) => setMriImage(e.target.files[0])}
-            />
+</div>
 
-            <button
-              type="button"
-              onClick={generateSummary}
-              className="mt-3 bg-green-600 px-4 py-2 rounded-xl"
-            >
-              {loading ? "Analyzing..." : "Generate AI Summary"}
-            </button>
+        <div className="grid lg:grid-cols-2 gap-8">
+
+          {/* Patient Details Card */}
+          <div className="bg-slate-900 rounded-3xl shadow-xl p-8">
+            <h2 className="text-2xl font-semibold mb-6">
+              👨‍⚕️ Patient Information
+            </h2>
+
+            <div className="space-y-5">
+
+              <div>
+                <label className="text-slate-300 block mb-2">
+                  Patient Name
+                </label>
+                <input
+                  type="text"
+                  value={patientName}
+                  onChange={(e) => setPatientName(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-blue-500"
+                  placeholder="Enter patient name"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-300 block mb-2">
+                  Age
+                </label>
+                <input
+                  type="number"
+                  value={patientAge}
+                  onChange={(e) => setPatientAge(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-blue-500"
+                  placeholder="Enter age"
+                />
+              </div>
+
+              <div>
+                <label className="text-slate-300 block mb-2">
+                  Gender
+                </label>
+
+                <select
+                  value={patientGender}
+                  onChange={(e) => setPatientGender(e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-blue-500"
+                >
+                  <option value="">Select Gender</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
           </div>
 
-          <textarea
-            value={formData.notes}
-            placeholder="Doctor Notes"
-            rows="5"
-            className="w-full p-3 rounded-xl bg-slate-800"
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                notes: e.target.value,
-              })
-            }
-          />
+          {/* MRI Upload Card */}
+          <div className="bg-slate-900 rounded-3xl shadow-xl p-8">
 
-          <button className="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl">
-            Save Patient
-          </button>
-        </form>
+            <h2 className="text-2xl font-semibold mb-6">
+              🧠 MRI Scan Upload
+            </h2>
+
+            <div className="border-2 border-dashed border-slate-700 rounded-2xl p-10 text-center">
+
+              <div className="text-6xl mb-4">
+                📁
+              </div>
+
+              <p className="text-slate-400 mb-6">
+                Upload MRI image (.jpg, .jpeg, .png)
+              </p>
+
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png"
+                onChange={(e) => setImage(e.target.files[0])}
+                className="text-sm"
+              />
+
+              {image && (
+                <p className="mt-4 text-green-400">
+                  Selected: {image.name}
+                </p>
+              )}
+            </div>
+
+            <button
+              className="w-full mt-8 bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl text-lg font-semibold transition"
+            >
+              🔬 Analyze MRI
+            </button>
+          </div>
+        </div>
+
+        {/* Future Result Section */}
+        <div className="mt-10 bg-slate-900 rounded-3xl shadow-xl p-8">
+
+          <h2 className="text-2xl font-semibold mb-5">
+            📊 MRI Analysis Report
+          </h2>
+
+          <div className="text-slate-400">
+            Upload an MRI scan and click <b>Analyze MRI</b> to generate:
+            <ul className="list-disc ml-6 mt-4 space-y-2">
+              <li>Tumor Detection</li>
+              <li>Tumor Type</li>
+              <li>Confidence Score</li>
+              <li>Probability Distribution</li>
+              <li>Heatmap Visualization</li>
+              <li>PDF Report</li>
+            </ul>
+          </div>
+        </div>
+
       </div>
     </div>
   );
