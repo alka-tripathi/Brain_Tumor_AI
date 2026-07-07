@@ -2,8 +2,10 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import { FaArrowLeft, FaHome } from "react-icons/fa";
 import { Stethoscope, Brain, FolderOpen, Microscope, BarChart2 } from "lucide-react";
+import { processMRIImage } from "@/lib/opencvUtils";
 
 export default function AddPatientPage() {
   const router = useRouter();
@@ -11,8 +13,13 @@ export default function AddPatientPage() {
   const [patientAge, setPatientAge] = useState("");
   const [patientGender, setPatientGender] = useState("");
   const [image, setImage] = useState(null);
+  const [imageUrl, setImageUrl] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisDone, setAnalysisDone] = useState(false);
   const fileInputRef = useRef(null);
+  const imgRef = useRef(null);
+  const canvasRef = useRef(null);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -28,13 +35,32 @@ export default function AddPatientPage() {
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setImage(e.dataTransfer.files[0]);
+      const file = e.dataTransfer.files[0];
+      setImage(file);
+      setImageUrl(URL.createObjectURL(file));
+      setAnalysisDone(false);
+    }
+  };
+
+
+  const handleAnalyze = async () => {
+    if (!imageUrl || !imgRef.current || !canvasRef.current) return;
+    setIsAnalyzing(true);
+    setAnalysisDone(false);
+    
+    // Process image using OpenCV
+    const success = await processMRIImage(imgRef.current, canvasRef.current);
+    
+    setIsAnalyzing(false);
+    if (success) {
+      setAnalysisDone(true);
     }
   };
 
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-8">
+      <Script src="https://docs.opencv.org/4.8.0/opencv.js" strategy="lazyOnload" />
       <div className="max-w-5xl mx-auto">
 
         {/* Heading */}
@@ -155,22 +181,59 @@ export default function AddPatientPage() {
               <input
                 type="file"
                 accept=".jpg,.jpeg,.png"
-                onChange={(e) => setImage(e.target.files[0])}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    setImage(file);
+                    setImageUrl(URL.createObjectURL(file));
+                    setAnalysisDone(false);
+                  }
+                }}
                 className="hidden"
                 ref={fileInputRef}
               />
 
               {image && (
-                <p className="mt-4 text-emerald-400 font-medium bg-emerald-500/10 py-2 px-4 rounded-xl inline-block">
-                  Selected: {image.name}
-                </p>
+                <div className="mt-6 text-left w-full flex flex-col items-center">
+                  <p className="text-emerald-400 font-medium bg-emerald-500/10 py-2 px-4 rounded-xl inline-block mb-4">
+                    Selected: {image.name}
+                  </p>
+                  <div className="flex flex-row gap-6 items-center justify-center">
+                    <div className="flex flex-col items-center">
+                      <span className="text-slate-400 text-sm mb-2 font-medium">Original</span>
+                      <img 
+                        src={imageUrl} 
+                        ref={imgRef}
+                        alt="Original MRI" 
+                        className="w-32 h-32 object-cover rounded-xl border-2 border-slate-700/50"
+                        crossOrigin="anonymous"
+                      />
+                    </div>
+                    {analysisDone && (
+                      <div className="flex flex-col items-center">
+                        <span className="text-indigo-400 text-sm mb-2 font-medium">Processed</span>
+                        <canvas 
+                          ref={canvasRef}
+                          className="w-32 h-32 object-cover rounded-xl border-2 border-indigo-500 shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+                        ></canvas>
+                      </div>
+                    )}
+                    {/* Hidden canvas for processing if not yet done */}
+                    <canvas ref={canvasRef} className={`hidden ${analysisDone ? 'hidden' : ''}`} />
+                  </div>
+                </div>
               )}
             </div>
 
             <button
-              className="w-full mt-8 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-900/20 py-4 rounded-2xl text-lg font-semibold transition-all flex items-center justify-center gap-2 text-white"
+              onClick={handleAnalyze}
+              disabled={!image || isAnalyzing}
+              className={`w-full mt-8 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-lg shadow-indigo-900/20 py-4 rounded-2xl text-lg font-semibold transition-all flex items-center justify-center gap-2 text-white ${
+                (!image || isAnalyzing) ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
-              <Microscope className="w-6 h-6" /> Analyze MRI
+              <Microscope className="w-6 h-6" /> 
+              {isAnalyzing ? "Processing with OpenCV..." : "Analyze MRI"}
             </button>
           </div>
         </div>
